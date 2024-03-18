@@ -1,3 +1,6 @@
+from AnalyzeImage import analyzeImage
+from WebCam import getImage
+
 import multiprocessing
 import traceback
 import cProfile
@@ -10,12 +13,14 @@ import cv2
 
 def main():
 
-    face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-    model = keras.saving.load_model('Models/LiteEmotionAI_7.keras')
-    vid = cv2.VideoCapture(0)
-
     queue1 = multiprocessing.Queue()
-    queue2 = multiprocessing.Queue()
+
+    p1 = multiprocessing.Process(target=getImage, args=(queue1,))
+    p2 = multiprocessing.Process(target=analyzeImage, args=(queue1,))
+
+    # Start processes
+    p1.start()
+    p2.start()
 
 
 if __name__ == '__main__':
@@ -23,7 +28,7 @@ if __name__ == '__main__':
     with cProfile.Profile() as pr:
         try:
             main()
-        except (KeyboardInterrupt, OverflowError):
+        except:
             traceback.print_exc()
 
     stats = pstats.Stats(pr)
